@@ -3,6 +3,9 @@ node_modules/
 
 # production
 dist/
+build/
 
 # local env files
 .env
+
+*.log
