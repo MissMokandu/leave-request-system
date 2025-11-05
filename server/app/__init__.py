@@ -1,5 +1,5 @@
 from flask import Flask
-from .extensions import db, jwt, cors
+from .extensions import db, jwt, cors, migrate
 from .models import User, LeaveRequest
 
 def create_app():
@@ -12,9 +12,10 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     cors.init_app(app)
+    migrate.init_app(app, db)
 
-    from app.routes.auth import auth_bp
-    app.register_blueprint(auth_bp)
+    from app.routes.auth_routes import auth_bp
+    from app.routes.leave_routes import leave_bp
 
 
     app.register_blueprint(auth_bp)

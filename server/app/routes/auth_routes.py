@@ -40,7 +40,7 @@ def login():
     if not name or not password:
         return jsonify ({'error': 'Ensure all fields are filled'}), 400
 
-    user = User.query.filter_by (name=name). first():
+    user = User.query.filter_by(name=name). first()
 
     if not user or not user.check_password(password):
         return jsonify ({'error': 'Invalid credentials'}), 401

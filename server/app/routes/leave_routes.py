@@ -2,39 +2,39 @@ from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models.user import User
 from app.models.leave_request import LeaveRequest
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime
 
-
-leave_bp = Blueprint ('leave', __name__, url_prefix='/leaves')
+leave_bp = Blueprint('leave', __name__, url_prefix='/leaves')
 
 @leave_bp.route('', methods=['POST'])
 @jwt_required()
-def submit_leave():
+def apply_for_leave():
     current_user = get_jwt_identity()
     user_id = current_user['id']
 
-    data=request.get_json()
+    data = request.get_json()
     leave_type = data.get('leave_type', 'annual')
     start_date = data.get('start_date')
     end_date = data.get('end_date')
     reason = data.get('reason')
 
     if not start_date or not end_date:
-        return jsonify ({'error': 'start date and end dates are required'}), 400
+        return jsonify({'error': 'start date and end dates are required'}), 400
 
     new_leave = LeaveRequest(
-        user_is=user_id,
+        user_id=user_id,
         leave_type=leave_type,
         start_date=datetime.strptime(start_date, '%Y-%m-%d'),
-        end_date=datetime.strptime(end_date, '%Y-%m-%d'), 
+        end_date=datetime.strptime(end_date, '%Y-%m-%d'),
         reason=reason
     )
- 
+
     db.session.add(new_leave)
     db.session.commit()
 
     return jsonify({'message': 'You have submitted your leave application successfully'})
+
 
 @leave_bp.route('', methods=['GET'])
 @jwt_required()
@@ -43,13 +43,12 @@ def view_leave():
     user_id = current_user['id']
     role = current_user['role']
 
-   if role == 'admin':
-    leaves =LeaveRequest.query.all()
+    if role == 'admin':
+        leaves = LeaveRequest.query.all()
+    else:
+        leaves = LeaveRequest.query.filter_by(user_id=user_id).all()
 
-   else:
-    leaves = LeaveRequest.query.filter_by(user_id=user_id).all()
-
-   result = []
+    result = []
     for leave in leaves:
         result.append({
             'id': leave.id,
@@ -61,8 +60,8 @@ def view_leave():
             'status': leave.status
         })
 
+    return jsonify(result), 200
 
-    return jsonify({result}),200
 
 @leave_bp.route('/<int:leave_id>/status', methods=['PATCH'])
 @jwt_required()
@@ -84,3 +83,39 @@ def update_leave_status(leave_id):
     db.session.commit()
 
     return jsonify({'message': f'Leave status updated to {status}'}), 200
+
+
+ALLOWED_LEAVE_TYPES = ['annual', 'sick', 'unpaid']
+
+@leave_bp.route('', methods=['POST'])
+@jwt_required()
+def submit_leave():
+    current_user = get_jwt_identity()
+    user_id = current_user['id']
+
+    data = request.get_json()
+    leave_type = data.get('leave_type', 'annual')
+    if leave_type not in ALLOWED_LEAVE_TYPES:
+        return jsonify({'error': f'Invalid leave type. Allowed: {ALLOWED_LEAVE_TYPES}'}), 400
+
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    reason = data.get('reason')
+
+    if not start_date or not end_date:
+        return jsonify({'error': 'Start and end dates are required'}), 400
+
+    new_leave = LeaveRequest(
+        user_id=user_id,
+        leave_type=leave_type,
+        start_date=datetime.strptime(start_date, '%Y-%m-%d'),
+        end_date=datetime.strptime(end_date, '%Y-%m-%d'),
+        reason=reason
+    )
+
+    db.session.add(new_leave)
+    db.session.commit()
+
+    return jsonify({'message': 'Leave request submitted successfully'}), 201
+
+
