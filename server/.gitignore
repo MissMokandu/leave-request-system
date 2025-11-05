@@ -1,0 +1,38 @@
+# 🐍 Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# 🚫 Virtual environment
+venv/
+.env/
+.env
+
+# 📦 Environment and config files
+*.env
+*.ini
+*.yaml
+*.yml
+config.json
+config.yaml
+config.toml
+
+# 🧱 SQLite database files
+*.db
+*.sqlite3
+
+# 🧰 IDE & Editor files
+.vscode/
+.idea/
+*.swp
+
+# 📁 OS junk
+.DS_Store
+Thumbs.db
+
+# 🧪 Testing
+.coverage
+pytest_cache/
+htmlcov/
