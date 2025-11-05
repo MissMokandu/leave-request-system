@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
 
-function Login() {
+function Login({ onLogin }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: "", password: "" });
   const [error, setError] = useState("");
@@ -20,13 +20,19 @@ function Login() {
 
     try {
       const res = await api.post("/auth/login", formData);
-      const token = res.data.access_token;
+      const { access_token, user } = res.data;
 
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", access_token);
+      
+      const userData = { ...user, token: access_token };
+      onLogin(userData);
 
-      // If backend encodes role in token, you can decode it or 
-      // fetch user info — for now, just redirect
-      navigate("/employee-dashboard");
+      // Redirect based on role
+      if (user.role === 'admin') {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/employee-dashboard");
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Login failed. Please try again.");
     } finally {
@@ -35,12 +41,12 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E6D5C2] to-[#F7F3EE] px-4">
-      <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-full max-w-md border border-[#E5CBB8]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F3F0] to-[#E8E2D4] px-4">
+      <div className="bg-white/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl w-full max-w-md border border-[#D4C5B9]">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#4E3B31] mb-2">Welcome Back</h1>
-          <p className="text-[#8C6E63]">Sign in to continue</p>
+          <h1 className="text-3xl font-bold text-[#6B5B73] mb-2">Welcome Back</h1>
+          <p className="text-[#8B9A7A]">Sign in to continue</p>
         </div>
 
         {/* Error */}
@@ -53,7 +59,7 @@ function Login() {
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-[#4E3B31] mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-[#6B5B73] mb-2">
               Username
             </label>
             <input
@@ -62,14 +68,14 @@ function Login() {
               type="text"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-[#D9BFAE] rounded-lg focus:ring-2 focus:ring-[#A98065] focus:border-[#A98065] transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="Enter your username"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[#4E3B31] mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-[#6B5B73] mb-2">
               Password
             </label>
             <input
@@ -78,7 +84,7 @@ function Login() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-[#D9BFAE] rounded-lg focus:ring-2 focus:ring-[#A98065] focus:border-[#A98065] transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="Enter your password"
               required
             />
@@ -87,7 +93,7 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#A98065] text-white py-3 px-4 rounded-lg hover:bg-[#8C6E63] focus:ring-2 focus:ring-[#A98065] focus:ring-offset-2 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#8B9A7A] text-white py-3 px-4 rounded-lg hover:bg-[#6B5B73] focus:ring-2 focus:ring-[#8B9A7A] focus:ring-offset-2 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -95,11 +101,11 @@ function Login() {
 
         {/* Footer */}
         <div className="mt-6 text-center">
-          <p className="text-[#8C6E63]">
-            Don’t have an account?{" "}
+          <p className="text-[#8B9A7A]">
+            Don't have an account?{" "}
             <Link 
               to="/register" 
-              className="text-[#A98065] hover:text-[#8C6E63] font-semibold transition-colors"
+              className="text-[#6B5B73] hover:text-[#8B9A7A] font-semibold transition-colors"
             >
               Sign up
             </Link>

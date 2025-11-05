@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../api";
 
-function Register() {
+function Register({ onRegister }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -40,41 +41,31 @@ function Register() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        }),
+      const res = await api.post("/auth/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Registration failed");
-      }
 
       alert("Registration successful! Please log in.");
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-gray-100 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F3F0] to-[#E8E2D4] px-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-[#D4C5B9]">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-3xl font-bold text-[#6B5B73] mb-2">
             Create Account
           </h1>
-          <p className="text-gray-600">Join LeaveManager today</p>
+          <p className="text-[#8B9A7A]">Join LeaveManager today</p>
         </div>
 
         {/* Error Message */}
@@ -89,7 +80,7 @@ function Register() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-[#6B5B73] mb-2"
             >
               Full Name
             </label>
@@ -99,7 +90,7 @@ function Register() {
               type="text"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="Enter your full name"
               required
             />
@@ -108,7 +99,7 @@ function Register() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-[#6B5B73] mb-2"
             >
               Email Address
             </label>
@@ -118,7 +109,7 @@ function Register() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="Enter your email"
               required
             />
@@ -127,7 +118,7 @@ function Register() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-[#6B5B73] mb-2"
             >
               Password
             </label>
@@ -137,7 +128,7 @@ function Register() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="At least 6 characters"
               required
             />
@@ -146,7 +137,7 @@ function Register() {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-[#6B5B73] mb-2"
             >
               Confirm Password
             </label>
@@ -156,7 +147,7 @@ function Register() {
               type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
               placeholder="Confirm your password"
               required
             />
@@ -165,7 +156,7 @@ function Register() {
           <div>
             <label
               htmlFor="role"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-[#6B5B73] mb-2"
             >
               Account Type
             </label>
@@ -174,12 +165,12 @@ function Register() {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-4 py-3 border border-[#D4C5B9] rounded-lg focus:ring-2 focus:ring-[#8B9A7A] focus:border-[#8B9A7A] transition-colors"
             >
               <option value="employee">Employee</option>
               <option value="admin">Administrator</option>
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-[#8B9A7A] mt-1">
               {formData.role === "admin"
                 ? "Admins can manage all employee leave requests"
                 : "Employees can submit and track their own leave requests"}
@@ -189,7 +180,7 @@ function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            className="w-full bg-[#8B9A7A] text-white py-3 px-4 rounded-lg hover:bg-[#6B5B73] focus:ring-2 focus:ring-[#8B9A7A] focus:ring-offset-2 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -197,11 +188,11 @@ function Register() {
 
         {/* Footer */}
         <div className="mt-6 text-center">
-          <p className="text-gray-600">
+          <p className="text-[#8B9A7A]">
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+              className="text-[#6B5B73] hover:text-[#8B9A7A] font-semibold transition-colors"
             >
               Sign in
             </Link>
@@ -213,4 +204,3 @@ function Register() {
 }
 
 export default Register;
-
