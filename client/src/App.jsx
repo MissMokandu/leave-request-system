@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./Components/ProtectedRoute";
 import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import Login from './pages/Login';
@@ -10,29 +9,15 @@ function App() {
   return (
     <Router>
       <Routes>
-        
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        
-        <Route
-          path="/employee-dashboard"
-          element={
-            <ProtectedRoute requiredRole="employee">
-              <EmployeeDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-dashboard"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Directly accessible pages */}
+        <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
-        
+        {/* Fallback for undefined routes */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
@@ -40,3 +25,4 @@ function App() {
 }
 
 export default App;
+
