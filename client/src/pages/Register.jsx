@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
-function Register({ onRegister }) {
+function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "employee"
+    role: "employee",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ function Register({ onRegister }) {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
     setError("");
   };
@@ -40,33 +40,27 @@ function Register({ onRegister }) {
     }
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch("http://127.0.0.1:5000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        }),
+      });
 
-      // In a real app, this would be an API call to your backend
-      const newUser = {
-        id: Date.now(),
-        name: formData.name,
-        email: formData.email,
-        role: formData.role,
-        joinDate: new Date().toISOString()
-      };
+      const data = await response.json();
 
-      // Save to localStorage (replace with actual backend in production)
-      localStorage.setItem("user", JSON.stringify(newUser));
-      
-      if (onRegister) {
-        onRegister(newUser);
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
       }
 
-      // Show success message
-      alert(`Successfully registered as ${formData.role}!`);
-      
-      // Navigate to appropriate dashboard
-      navigate(formData.role === "admin" ? "/admin-dashboard" : "/employee-dashboard");
-
+      alert("Registration successful! Please log in.");
+      navigate("/login");
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -77,7 +71,9 @@ function Register({ onRegister }) {
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Create Account
+          </h1>
           <p className="text-gray-600">Join LeaveManager today</p>
         </div>
 
@@ -91,7 +87,10 @@ function Register({ onRegister }) {
         {/* Registration Form */}
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Full Name
             </label>
             <input
@@ -107,7 +106,10 @@ function Register({ onRegister }) {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email Address
             </label>
             <input
@@ -123,7 +125,10 @@ function Register({ onRegister }) {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Password
             </label>
             <input
@@ -139,7 +144,10 @@ function Register({ onRegister }) {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Confirm Password
             </label>
             <input
@@ -155,7 +163,10 @@ function Register({ onRegister }) {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Account Type
             </label>
             <select
@@ -169,10 +180,9 @@ function Register({ onRegister }) {
               <option value="admin">Administrator</option>
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              {formData.role === "admin" 
+              {formData.role === "admin"
                 ? "Admins can manage all employee leave requests"
-                : "Employees can submit and track their own leave requests"
-              }
+                : "Employees can submit and track their own leave requests"}
             </p>
           </div>
 
@@ -189,8 +199,8 @@ function Register({ onRegister }) {
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="text-green-600 hover:text-green-700 font-semibold transition-colors"
             >
               Sign in
@@ -203,3 +213,4 @@ function Register({ onRegister }) {
 }
 
 export default Register;
+
