@@ -1,16 +1,16 @@
-# from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-# from flask_jwt_extended import JWTManager
-# from flask_cors import CORS
+from flask import Flask
+from .extensions import db, jwt, cors
+from .models import User, LeaveRequest
 
-db = SQLAlchemy()
-# jwt = JWTManager()
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///leave-request-system.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = 'replace_with_your_secret_key'
+    app.config['JWT_SECRET_KEY'] = 'replace_with_your_jwt_secret_key'
 
-from .user import User
-from .leaveRequest import LeaveRequest
+    db.init_app(app)
+    jwt.init_app(app)
+    cors.init_app(app)
 
-__all__=[
-    'db'
-    'user'
-    'LeaveRequest'
-]
+    return app
