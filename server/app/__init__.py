@@ -13,4 +13,11 @@ def create_app():
     jwt.init_app(app)
     cors.init_app(app)
 
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(leave_bp)  
+
     return app
