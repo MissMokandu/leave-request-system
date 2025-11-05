@@ -1,71 +1,159 @@
-// src/pages/Login.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-function Login() {
+function Login({ onLogin }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const demoAccounts = [
+    { email: "admin@example.com", password: "admin", role: "admin", name: "Admin User" },
+    { email: "employee@example.com", password: "employee", role: "employee", name: "John Employee" }
+  ];
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError(""); // Clear error when user starts typing
+  };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    // Simple dummy login logic for demo
-    if (email === "admin@example.com" && password === "admin") {
-      localStorage.setItem("user", JSON.stringify({ role: "admin", email }));
-      navigate("/admin-dashboard");
-    } else if (email === "employee@example.com" && password === "employee") {
-      localStorage.setItem("user", JSON.stringify({ role: "employee", email }));
-      navigate("/employee-dashboard");
-    } else {
-      setError("Invalid email or password");
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const user = demoAccounts.find(
+        account => account.email === formData.email && account.password === formData.password
+      );
+
+      if (user) {
+        const userData = { 
+          email: user.email, 
+          role: user.role, 
+          name: user.name 
+        };
+        
+        localStorage.setItem("user", JSON.stringify(userData));
+        
+        if (onLogin) {
+          onLogin(userData);
+        }
+        
+        navigate(user.role === "admin" ? "/admin-dashboard" : "/employee-dashboard");
+      } else {
+        setError("Invalid email or password");
+      }
+    } catch (err) {
+      setError("Login failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const fillDemoAccount = (account) => {
+    setFormData({
+      email: account.email,
+      password: account.password
+    });
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-10 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 px-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in to your account</p>
+        </div>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {/* Demo Accounts */}
+        <div className="mb-6 space-y-2">
+          <p className="text-sm text-gray-600 text-center">Demo accounts:</p>
+          <div className="flex gap-2 justify-center">
+            {demoAccounts.map((account) => (
+              <button
+                key={account.role}
+                onClick={() => fillDemoAccount(account)}
+                className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition-colors"
+              >
+                {account.role}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <form onSubmit={handleLogin}>
-          <label className="block mb-2 font-semibold">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
-            required
-          />
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+            {error}
+          </div>
+        )}
 
-          <label className="block mb-2 font-semibold">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 mb-6 border rounded"
-            required
-          />
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <p className="mt-4 text-center">
-          Don’t have an account?{" "}
-          <span
-            className="text-blue-600 cursor-pointer"
-            onClick={() => navigate("/register")}
-          >
-            Register
-          </span>
-        </p>
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <Link 
+              to="/register" 
+              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
